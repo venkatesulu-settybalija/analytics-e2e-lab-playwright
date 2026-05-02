@@ -1,22 +1,19 @@
-# Analytics E2E Lab
+# Analytics E2E Lab (Playwright)
 
-Local-first analytics demo app (no database, no Docker) with an automation framework on top.
+Playwright automation for the **shared analytics demo app** published as [`@venkatesulu-settybalija/analytics-demo-app`](https://github.com/venkatesulu-settybalija/analytics-demo-app) (no database, no Docker). This repo contains **tests and framework code only** — the Express + static UI live in that package.
 
-## Includes
+## Demo app (via dependency)
 
-- Express app with static multi-page UI:
-  - Login
-  - Feed editor
-  - Dashboard with KPI cards, configurable time window (+ day/week grain), bucket labels, bar vs line chart, **CSV export** of KPIs + series, and **saved views** persisted in `localStorage` (browser-only “dashboards”)
-  - Explore screen with **dataset catalogue** (`feeds`, synthetic `events_daily`) and **SQL Lab lite** (read-only `SELECT` on `feeds`)
-- API routes for auth (returns `role`), feed management, `GET /api/datasets`, `POST /api/sqllab/run`, parameterized `GET /api/dashboard/summary?days=&granularity=`, and `GET /api/auth/me`
-- **Roles**: `admin` (default `demo` / `demo123`) can create, edit, and toggle feeds; `viewer` (`viewer` / `viewer123`) is read-only for mutations
-- GitHub Actions workflow runs `npm test` on push/PR
-- Playwright test architecture with:
-  - POM (`src/ui/pages`)
-  - Fixture composition (`src/fixtures/lab.fixture.ts`)
-  - API clients (`src/api/clients`)
-  - API and UI projects
+- Login, **feed editor**, **dashboard** (KPIs, time window + day/week grain, charts, **CSV export**, **saved views** in `localStorage`)
+- **Explore** + **SQL Lab lite** (read-only `SELECT` on `feeds`)
+- APIs: auth with **roles** (`admin` / `viewer`), feeds, `GET /api/datasets`, `POST /api/sqllab/run`, `GET /api/dashboard/summary`, `GET /api/auth/me`
+- Default users: `demo` / `demo123` (admin), `viewer` / `viewer123` (read-only)
+
+## This repo
+
+- Playwright **API** and **UI** projects
+- POM (`src/ui/pages`), fixtures (`src/fixtures/lab.fixture.ts`), API clients (`src/api/clients`)
+- GitHub Actions runs `npm test` on push/PR
 
 ## Run
 
@@ -26,14 +23,18 @@ npx playwright install chromium
 npm test
 ```
 
-For just API tests:
+API only:
 
 ```bash
 npm run test:api
 ```
 
-Override credentials with environment variables (see `.env.example`). `npm run app:start` enables `APP_ENABLE_RESET=true` so `POST /api/__reset` works when you reuse the local server with Playwright.
+`npm run app:start` runs the **`analytics-demo-app`** binary from `node_modules` with `APP_ENABLE_RESET=true` (for manual runs). Playwright’s `webServer` uses the same script.
 
-Set `APP_PORT` (and optionally `BASE_URL`) if port `3100` is already taken; Playwright’s `baseURL` and `src/config/env.ts` default to that port when unset.
+Override credentials via `.env.example`. Set `APP_PORT` / `BASE_URL` if `3100` is taken.
 
-Playwright is configured with `workers: 1` because every test hits the same in-memory demo process; keeping one worker avoids flaky shared-state races.
+**Workers:** `workers: 1` — shared in-memory server state.
+
+## Pinning the demo app
+
+`package.json` pins `github:venkatesulu-settybalija/analytics-demo-app#v1.0.1`. Bump the tag when the demo app releases a new version.
